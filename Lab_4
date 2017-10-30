@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <allegro.h>
+#include <math.h>
+#include <stack>
+#include <time.h>
+
+int obramowanie;
+int wypelnienie;
+int szerokosc = 700;
+int wysokosc = 700;
+
+struct element{
+    int x, y;
+};
+
+std::stack <element> stos;
+
+void okrag(int xc, int yc, int r){
+    double step = 1.0 / r;
+
+    for(double a=0; a < M_PI/4; a += step){
+        int x = r * cos(a);
+        int y = r * sin(a);
+
+        putpixel(screen, xc+x,yc+y, obramowanie);
+        putpixel(screen, xc+x, yc-y, obramowanie);
+        putpixel(screen, xc-x, yc+y, obramowanie);
+        putpixel(screen, xc-x, yc-y, obramowanie);
+        putpixel(screen, xc+y,yc+x, obramowanie);
+        putpixel(screen, xc-y, yc+x, obramowanie);
+        putpixel(screen, xc+y,yc-x, obramowanie);
+        putpixel(screen, xc-y, yc-x, obramowanie);
+    }
+}
+
+void putpixel2(int zm_x, int zm_y){
+    int kolor = getpixel(screen, zm_x, zm_y);
+
+    if (kolor != obramowanie && kolor != wypelnienie){
+        putpixel(screen, zm_x, zm_y, wypelnienie);
+        stos.push({zm_x, zm_y});
+    }
+}
+
+void wypelnij(int x, int y){
+    putpixel2(x,y);
+
+    while(stos.empty() == false){
+        element obiekt = stos.top();
+        stos.pop();
+
+        int x2 = obiekt.x;
+        int y2 = obiekt.y;
+
+        if (y2+1 < SCREEN_H)
+            putpixel2(x2, y2 + 1);
+        if (y2-1 >= 0)
+            putpixel2(x2, y2 - 1);
+        if (x2+1 < SCREEN_W)
+            putpixel2(x2 + 1, y2);
+        if (x2-1 >= 0)
+            putpixel2(x2 - 1, y2);
+    }
+}
+
+int start(){
+    srand(time(NULL));
+
+    if(allegro_init() != 0) exit(1);
+    set_gfx_mode(GFX_AUTODETECT_WINDOWED, szerokosc, wysokosc, 0, 0);
+    install_keyboard();
+    install_mouse();
+    show_os_cursor(1);
+
+    obramowanie = makecol(255, 255, 255);
+    wypelnienie = makecol(128, 128, 128);
+
+    for(int i = 0; i < rand()%10 + 5; i++)
+        okrag(rand()%SCREEN_W, rand()%SCREEN_H, rand()%(SCREEN_W/4));
+}
+
+int main(){
+    start();
+
+    while(1){
+        if(key[KEY_ESC]) break;
+
+        if(mouse_b & 1)
+            wypelnij(mouse_x, mouse_y);
+        if(mouse_b & 2)
+            wypelnienie = makecol(rand()%255, rand()%255, rand()%255);
+    }
+
+    return 0;
+}
+END_OF_MAIN()
