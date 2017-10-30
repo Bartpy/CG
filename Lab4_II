@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+typedef struct stos{
+int x;
+int y;
+struct stos *prev;
+}stos;
+
+stos *szczyt=NULL;
+int globalX,globalY;
+
+void push(int liczba_x,int liczba_y){
+
+    stos *nowy_element;
+    nowy_element =(stos *)malloc(sizeof(stos));
+    nowy_element->x = liczba_x;
+     nowy_element->y = liczba_y;
+    nowy_element->prev=NULL;
+    if(szczyt == NULL)
+    szczyt = nowy_element;
+    else {
+    nowy_element->prev=szczyt;
+    szczyt = nowy_element;
+         }
+
+}
+
+
+
+
+
+int pop(){
+
+     stos *tmp;
+
+
+     if (szczyt == NULL)
+     printf("Stos pusty\n");
+     else{
+     tmp = szczyt;
+     szczyt=szczyt->prev;
+     globalX =(tmp)->x;
+     globalY =(tmp)->y;
+     free(tmp);
+
+     }
+
+
+}
+
+int rozmiar(){
+     stos *temp=szczyt;
+   int zmienna=0;
+    while (temp!=NULL){
+
+     temp=temp->prev;
+     zmienna++;
+     }
+return zmienna;
+}
+
+
+
+
+
+void main(){
+
+
+push(3,3);
+push(7,4);
+push(9,9);
+
+pop();
+printf("%d,%d\n",globalX,globalY);
+pop();
+printf("%d,%d\n",globalX,globalY);
+pop();
+printf("%d,%d\n",globalX,globalY);
+}
+
+
