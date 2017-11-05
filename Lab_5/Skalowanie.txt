@@ -1,0 +1,188 @@
+#include <allegro.h>
+#include <time.h>
+#include <stdio.h>
+#include <math.h>
+
+char c;
+
+struct Point{
+    float x,y;
+} point;
+
+struct Line{
+    float x1,y1,x2,y2;
+} lines[11], originals[11];
+
+int init() {
+
+    int depth, res;
+
+    allegro_init();
+
+    if ((depth  = desktop_color_depth()) == 0) depth = 32;
+    set_color_depth(depth);
+
+    if ((res = set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0)) != 0) {
+        allegro_message(allegro_error);
+        exit(-1);
+    }
+
+    install_keyboard();
+
+    set_palette(default_palette);
+    clear_to_color(screen, makecol(255,255,255));
+
+    const float cx=SCREEN_W/2,cy=SCREEN_H/2;
+
+    point.x=cx; point.y=cy;
+
+        // DU¯Y KWADRAT
+    lines[0 ].x1=cx-80; lines[0 ].y1=cy-80; lines[0 ].x2=cx+80; lines[0 ].y2=cy-80;
+    lines[1 ].x1=cx+80; lines[1 ].y1=cy-80; lines[1 ].x2=cx+80; lines[1 ].y2=cy+80;
+    lines[2 ].x1=cx+80; lines[2 ].y1=cy+80; lines[2 ].x2=cx-80; lines[2 ].y2=cy+80;
+    lines[3 ].x1=cx-80; lines[3 ].y1=cy+80; lines[3 ].x2=cx-80; lines[3 ].y2=cy-80;
+
+        // MA£Y KWADRAT
+    lines[4 ].x1=cx-60; lines[4 ].y1=cy-60; lines[4 ].x2=cx-20; lines[4 ].y2=cy-60;
+    lines[5 ].x1=cx-20; lines[5 ].y1=cy-60; lines[5 ].x2=cx-20; lines[5 ].y2=cy-20;
+    lines[6 ].x1=cx-60; lines[6 ].y1=cy-20; lines[6 ].x2=cx-20; lines[6 ].y2=cy-20;
+    lines[7 ].x1=cx-60; lines[7 ].y1=cy-20; lines[7 ].x2=cx-60; lines[7 ].y2=cy-60;
+
+        // UŒMIECH i OCZKO
+    lines[8 ].x1=cx+20; lines[8 ].y1=cy-20; lines[8 ].x2=cx+60; lines[8 ].y2=cy-20;
+    lines[9 ].x1=cx-60; lines[9 ].y1=cy+40; lines[9 ].x2=cx+20; lines[9 ].y2=cy+60;
+    lines[10 ].x1=cx+20; lines[10 ].y1=cy+60; lines[10 ].x2=cx+60; lines[10 ].y2=cy+40;
+
+    // ZAPAMIÊTAJ POCZ¥TKOWE WSPÓ£RZÊDNE
+	for(int i=0;i<11;i++) {
+	    originals[i].x1=lines[i].x1;
+	    originals[i].y1=lines[i].y1;
+	    originals[i].x2=lines[i].x2;
+	    originals[i].y2=lines[i].y2;
+	}
+
+return 0;
+}
+
+
+void translate(int x,int y) {
+    // center point
+    point.x+=x;
+    point.y+=y;
+
+    for(int i=0;i<11;i++)
+    {
+        lines[i].x1+=x;
+        lines[i].y1+=y;
+        lines[i].x2+=x;
+        lines[i].y2+=y;
+    }
+}
+
+void rotate(double angle)
+{
+    const double cos_a=cos(angle*M_PI/180.0f),sin_a=sin(angle*M_PI/180.0f);
+    const float cx=SCREEN_W/2,cy=SCREEN_H/2;
+
+    // center point
+    double x,y;
+
+    x=cx+round((point.x-cx)*cos_a-(point.y-cy)*sin_a);
+    y=cy+round((point.x-cx)*sin_a+(point.y-cy)*cos_a);
+    point.x=x;
+    point.y=y;
+
+    for(int i=0;i<11;i++)
+    {
+        double x1,y1,x2,y2;
+        x1=cx+(lines[i].x1-cx)*cos_a-(lines[i].y1-cy)*sin_a;
+        y1=cy+(lines[i].x1-cx)*sin_a+(lines[i].y1-cy)*cos_a;
+
+        x2=cx+(lines[i].x2-cx)*cos_a-(lines[i].y2-cy)*sin_a;
+        y2=cy+(lines[i].x2-cx)*sin_a+(lines[i].y2-cy)*cos_a;
+
+        lines[i].x1=x1;
+       // if ((int)x1 == (int)x2 + 1 || (int)x1 + 1 == (int)x2) lines[i].x2 = x1; else
+       lines[i].x2=x2;
+        lines[i].y1=y1;
+        // if ((int)y1 == (int)y2 + 1 || (int)y1 + 1 == (int)y2) lines[i].y2 = y1; else
+        lines[i].y2=y2;
+    }
+
+}
+
+void scale(float k)
+{
+    for(int i=0;i<11;i++)
+    {
+        lines[i].x1=lines[i].x1*k+(1-k)*point.x;
+        lines[i].y1=lines[i].y1*k+(1-k)*point.y;
+        lines[i].x2=lines[i].x2*k+(1-k)*point.x;
+        lines[i].y2=lines[i].y2*k+(1-k)*point.y;
+    }
+}
+
+int main() {
+
+    init();
+    srand(time(NULL));
+
+    textout_ex(screen,font,"GRAFIKA  KOMPUTEROWA",260,20,makecol(0,0,0),-1);
+    textout_ex(screen,font,"Laboratorium nr 5",267,30,makecol(0,0,0),-1);
+    textout_ex(screen,font,"ESC <- Zakoncz",515,5,makecol(0,0,0),-1);
+
+	for (int i=0;i<11;i++) line(screen,lines[i].x1,lines[i].y1,lines[i].x2,lines[i].y2,makecol(0,0,0));
+
+      while(true) {
+
+        c = readkey();
+
+        clear_to_color(screen,makecol(255,255,255));
+
+        // ESCAPE
+        if ((c&0xff) == 27) break;
+         // t - PRAWO
+        else if((c&0xff) == 116)
+            translate(10,0);
+         // T - LEWO
+        else if((c&0xff) == 84)
+            translate(-10,0);
+        // o - OBRÓT W PRAWO
+        else if((c&0xff) == 111)
+            rotate(10);
+        // O - OBRÓT W LEWO
+        else if((c&0xff) == 79)
+            rotate(-10);
+        // s - ZMNIEJSZENIE
+        else if((c&0xff) == 115)
+            scale(0.5f);
+        // S - POWIÊKSZENIE
+        else if((c&0xff) == 83)
+            scale(2.0f);
+        // x - RESET
+        else if((c&0xff) == 120) {
+
+            point.x=SCREEN_W/2;
+            point.y=SCREEN_H/2;
+
+            for(int i=0;i<11;i++) {
+                lines[i].x1=originals[i].x1;
+                lines[i].y1=originals[i].y1;
+                lines[i].x2=originals[i].x2;
+                lines[i].y2=originals[i].y2;
+            }
+        }
+
+        // RYSUJ NA EKRANIE
+        for(int i=0;i<11;i++)line(screen,lines[i].x1,lines[i].y1,lines[i].x2,lines[i].y2,makecol(0,0,0));
+        textout_ex(screen,font,"GRAFIKA  KOMPUTEROWA",260,20,makecol(0,0,0),-1);
+        textout_ex(screen,font,"Laboratorium nr 5",267,30,makecol(0,0,0),-1);
+        textout_ex(screen,font,"ESC <- Zakoncz",515,5,makecol(0,0,0),-1);
+    }
+
+allegro_exit();
+return 0;
+}
+END_OF_MAIN();
+
+
