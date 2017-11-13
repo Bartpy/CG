@@ -1,0 +1,54 @@
+#include <allegro.h>
+#include <math.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int w=800;
+int h=600;
+BITMAP *bmp = NULL;
+BITMAP *bmp1 = NULL;
+PALETTE palette;
+
+int main() {
+
+    allegro_init();
+    set_color_depth(32);
+    install_keyboard();
+    set_gfx_mode(GFX_AUTODETECT_WINDOWED, w, h, 0, 0);
+    clear_to_color (screen, makecol (100, 100 ,100));
+
+    bmp = load_bitmap("kwadrat.bmp", palette);
+
+    if (!bmp) {
+        set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+        allegro_message("Blad ladowania bitmapy");
+        allegro_exit();
+        return 0;
+    }
+
+    bmp1 = load_bitmap("kwadrat1.bmp", palette);
+    if (!bmp){
+        set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+        allegro_message("Blad ladowania bitmapy");
+        allegro_exit();
+        return 0;
+    }
+
+    set_alpha_blender();
+    draw_sprite(screen, bmp1, 350, 250);
+    set_trans_blender(128, 128, 128, 128);
+    draw_trans_sprite(screen, bmp, 300, 200);
+
+
+    while(!key[KEY_ESC]){}
+
+
+
+    destroy_bitmap(bmp);
+    destroy_bitmap(bmp1);
+    allegro_exit();
+    return 0;
+}
+END_OF_MAIN();
+
+
