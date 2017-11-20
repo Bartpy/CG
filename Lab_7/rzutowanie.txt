@@ -1,0 +1,144 @@
+#include <allegro.h>
+#include <math.h>
+
+BITMAP *buffer;
+
+int distance=100;
+bool perspective=true;
+
+struct Point {
+    int x,y,z;
+};
+
+struct Figure {
+    Point front[10],back[10];
+}f;
+
+void init() {
+    // front
+    f.front[0].x=50 ; f.front[0].y=50 ; f.front[0].z=0;
+    f.front[1].x=300; f.front[1].y=50 ; f.front[1].z=0;
+    f.front[2].x=300; f.front[2].y=130; f.front[2].z=0;
+    f.front[3].x=140; f.front[3].y=130; f.front[3].z=0;
+    f.front[4].x=140; f.front[4].y=200; f.front[4].z=0;
+    f.front[5].x=250; f.front[5].y=200; f.front[5].z=0;
+    f.front[6].x=250; f.front[6].y=280; f.front[6].z=0;
+    f.front[7].x=140; f.front[7].y=280; f.front[7].z=0;
+    f.front[8].x=140; f.front[8].y=450; f.front[8].z=0;
+    f.front[9].x=50 ; f.front[9].y=450; f.front[9].z=0;
+
+    // back
+    for(int i=0;i<10;i++) {
+        f.back[i].x=f.front[i].x; f.back[i].y=f.front[i].y; f.back[i].z=20;
+    }
+}
+
+void calc(Point p, Point &r,int d,bool perspective) {
+    if(perspective && p.z!=-d) {
+        float l=d/(float)(p.z+d);
+
+        r.x=p.x*l;
+        r.y=p.y*l;
+    } else {
+        r.x=p.x;
+        r.y=p.y;
+    }
+}
+
+void draw(bool perspective) {
+    Point p1,p2,p3,p4;
+
+    // czysc ekran
+    clear_to_color(buffer,makecol(255,255,255));
+
+    for(int i=0;i<9;i++) {
+        calc(f.front[i  ],p1,distance,perspective);
+        calc(f.front[i+1],p2,distance,perspective);
+
+        calc(f.back [i  ],p3,distance,perspective);
+        calc(f.back [i+1],p4,distance,perspective);
+        line(buffer,p1.x,p1.y,p2.x,p2.y,makecol(0,0,0));
+        line(buffer,p3.x,p3.y,p4.x,p4.y,makecol(0,0,0));
+    }
+
+    calc(f.front[0],p1,distance,perspective);
+    calc(f.front[9],p2,distance,perspective);
+    calc(f.back [0],p3,distance,perspective);
+    calc(f.back [9],p4,distance,perspective);
+    line(buffer,p1.x,p1.y,p2.x,p2.y,makecol(0,0,0));
+    line(buffer,p3.x,p3.y,p4.x,p4.y,makecol(0,0,0));
+
+    for(int i=0;i<10;i++) {
+        calc(f.front[i],p1,distance,perspective);
+        calc(f.back [i],p2,distance,perspective);
+        line(buffer,p1.x,p1.y,p2.x,p2.y,makecol(0,0,0));
+    }
+
+    textprintf_ex(buffer, font, 10, 10, makecol(255, 100, 200),-1, "Distance: %d", distance);
+    blit(buffer,screen,0,0,0,0,SCREEN_W,SCREEN_H);
+}
+
+int main() {
+    allegro_init(); // inicjalizacja biblioteki
+    set_color_depth(24);
+    set_gfx_mode(GFX_AUTODETECT_WINDOWED, 640, 480, 0, 0); // tryb okienkowy 640x480
+    install_keyboard(); // obsluga klawiatury
+
+    // set buffer
+	buffer=create_bitmap(SCREEN_W,SCREEN_H);
+
+    init();
+
+    draw(perspective);
+
+	while(true) {
+
+	    char c = readkey() >> 8;
+
+	    if (c == KEY_P) {
+	        perspective=true;
+            draw(perspective);
+	    }
+
+	    if (c == KEY_R) {
+	        perspective=false;
+            draw(perspective);
+	    }
+
+	    if (c == KEY_A) {
+	        for (int i=0;i<10;i++) {
+                f.front[i].x-=10;
+                f.back[i].x-=10;
+            }
+            draw(perspective);
+	    }
+
+	    if (c == KEY_D) {
+	        for (int i=0;i<10;i++) {
+                f.front[i].x+=10;
+                f.back[i].x+=10;
+            }
+            draw(perspective);
+	    }
+
+	    if (perspective) {
+	        if (c == KEY_W) {
+	            distance-=5;
+	            if(distance<0)distance=0;
+	            draw(perspective);
+	        }
+	        if (c == KEY_S){
+	            distance+=5;
+	            draw(perspective);
+	        }
+	    }
+
+	    if (c == KEY_ESC) break;
+	}
+
+    destroy_bitmap(buffer);
+
+	allegro_exit(); // zwolnienie zasobów biblioteki
+    return 0;
+}
+END_OF_MAIN() // makro zapewniajace wieloplatformowosc kodu
