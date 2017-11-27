@@ -1,0 +1,176 @@
+
+//#include <windows.h>
+#include <GL/glut.h>
+#include <stdlib.h>
+
+// stae do obsÅ?ugi menu podrÄ?cznego
+enum
+{
+  EXIT // wyjÅ?cie
+};
+
+/******FUNKCJE GLUTA******/
+
+// funkcja generujÄ?ca scenÄ? 3D
+void display(void);
+
+// obsÅ?uga menu podrÄ?cznego
+void menu(int v);
+
+// zmiana rozmiaru okna
+void reshape(int w, int h);
+
+// obsÅ?uga klawiatury
+void keyboard (unsigned char key, int x, int y);
+
+// obsÅ?uga klawiszy funkcyjnych i klawiszy kursora
+void specialKeys (int key, int x, int y);
+
+
+int main(int argc, char *argv[])
+{
+    // inicjalizacja biblioteki GLUT
+  glutInit (&argc,argv);
+
+  // inicjalizacja bufora ramki
+  glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
+
+  // rozmiary gÅ?Ã³wnego okna programu
+  glutInitWindowSize (400,400);
+
+  // utworzenie gÅ?Ã³wnego okna programu
+  glutCreateWindow ("Kwadrat");
+
+  // doÅ?Ä?czenie funkcji generujÄ?cej scenÄ? 3D
+  glutDisplayFunc (display);
+
+  // doÅ?Ä?czenie funkcji wywoÅ?ywanej przy zmianie rozmiaru okna
+  glutReshapeFunc (reshape);
+
+ // doÅ?Ä?czenie funkcji obsÅ?ugi klawiatury
+  glutKeyboardFunc (keyboard);
+
+// doÅ?Ä?czenie funkcji obsÅ?ugi klawiszy specjalnych
+  glutSpecialFunc (specialKeys);
+
+  // utworzenie menu podrÄ?cznego
+  glutCreateMenu (menu);
+
+  // dodadnie pozycji do menu podrÄ?cznego
+  glutAddMenuEntry ("Exit",EXIT);
+
+  // okreÅ?lenie przycisku myszki obsÅ?ugujÄ?cej menu podrÄ?czne
+  glutAttachMenu (GLUT_RIGHT_BUTTON);
+
+  // wprowadzenie programu do obsÅ?ugi pÄ?tli komunikatÃ³w
+  glutMainLoop ();
+  return 0;
+
+}
+
+// funkcja rysujÄ?ca scenÄ?
+void display ()
+{
+  // kolor tÅ?a - zawartoÅ?Ä? bufora koloru
+  glClearColor (0.0,0.0,0.0,0.0);
+
+  // czyszczenie bufora koloru
+  glClear (GL_COLOR_BUFFER_BIT);
+
+// wybÃ³r macierzy modelowania
+  glMatrixMode (GL_MODELVIEW);
+
+  // macierz modelowania = macierz jednostkowa
+  glLoadIdentity ();
+
+  // przesuniÄ?cie obiektu o wektor [0,0,-3]
+  glTranslatef (0,0,-3.0);
+
+  // kolor kwadratu
+  glColor3f (1.0,1.0,1.0);
+
+  // poczÄ?tek definicji kwadratu zÅ?oÅŸonego z linii
+  glBegin (GL_LINES);
+
+
+    glVertex3f (1.0, 1.0, 1.0);
+    glVertex3f (1.0, -1.0, 1.0);
+
+    glVertex3f (-1.0, 1.0, 1.0);
+    glVertex3f (-1.0, -1.0, 1.0);
+
+    glVertex3f (1.0, 1.0, 1.0);
+    glVertex3f (-1.0, 1.0, 1.0);
+
+    glVertex3f (1.0, -1.0, 1.0);
+    glVertex3f (-1.0, -1.0, 1.0);
+
+  // koniec definicji prymitywu
+  glEnd ();
+
+  // skierowanie poleceÃ¹ do wykonania
+  glFlush ();
+
+  // zamiana buforÃ³w koloru
+  glutSwapBuffers();
+}
+
+// obsÅ?uga menu podrÄ?cznego
+void menu (int value)
+{
+  switch (value)
+    {
+      // wyjÅ?cie
+      case EXIT:
+        exit(0);
+    }
+}
+
+// zmiana wielkoÅ?ci okna
+void reshape (int w,int h)
+{
+  // obszar renderingu - caÅ?e okno
+  glViewport (0,0,w,h);
+
+  //ustawienie rzutowania
+  glMatrixMode (GL_PROJECTION);
+
+  // macierz rzutowania = macierz jednostkowa
+  glLoadIdentity ();
+
+  //Rozmiar bryÅ?y odcinania w rzutowaniu prostokatnym
+  glOrtho (-2.0,2.0,-2.0,2.0,-2.0,2.0);
+
+
+  // generowanie sceny 3D
+  display ();
+}
+
+// obsÅ?uga klawiatury
+void keyboard (unsigned char key, int x, int y)
+{
+  // klawisz +
+  switch(key){
+      case  '+': break;
+      case  '-': break;
+  }
+  // odrysowanie okna
+  reshape (glutGet (GLUT_WINDOW_WIDTH),glutGet (GLUT_WINDOW_HEIGHT));
+}
+
+// obsÅ?uga klawiszy funkcyjnych i klawiszy kursora
+
+void specialKeys (int key, int x, int y)
+{
+  switch (key)
+    {
+      case GLUT_KEY_LEFT: break;
+      case GLUT_KEY_UP:   break;
+      case GLUT_KEY_RIGHT:break;
+      case GLUT_KEY_DOWN: break;
+    }
+
+  // odrysowanie okna
+  reshape (glutGet (GLUT_WINDOW_WIDTH),glutGet (GLUT_WINDOW_HEIGHT));
+}
+
