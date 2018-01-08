@@ -1,0 +1,85 @@
+#include <windows.h>
+#include <Gl/gl.h>
+#include <Gl/glu.h>
+#include <GL/glut.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#define ANIM_FPS 20
+
+int x=0,y=0,z=0;
+int os_x,os_y,os_z;
+float czerwony=0.0;
+float zielony=1.0;
+float niebieski=0.0;
+
+void display()
+{
+  glClear(GL_COLOR_BUFFER_BIT );
+
+ os_x+=x;
+  os_y+=y;
+
+
+    if (os_x == glutGet( GLUT_WINDOW_HEIGHT ))
+    x=-5;
+
+    if (os_y==glutGet( GLUT_WINDOW_WIDTH )/2)
+    y=-10;
+
+    if (os_x == 0)
+    x=5;
+
+    if (os_y==0)
+    y=10;
+
+glColor3f(czerwony, zielony, niebieski);
+glTranslatef(x, y,z);
+glutWireCube(100);
+glutSwapBuffers();
+ //glutPostRedisplay();
+}
+
+
+void reshape(int szer, int wys) {
+  glViewport(0, 0, (GLsizei) szer, (GLsizei) wys);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  glOrtho(0, 640,-0, 480, -100, 100);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+}
+void Z(int val) {
+
+	glutPostRedisplay();
+	glutTimerFunc(5000, Z, 0);
+}
+void Z_Kol(int val) {
+    float red=rand()%256;
+	float green=rand()%256;
+	float blue=rand()%256;
+
+	czerwony=red/256;
+	zielony=green/256;
+	niebieski=blue/256;
+
+	glutPostRedisplay();
+	glutTimerFunc(5000, Z_Kol, 0);
+}
+
+
+int main(int argc, char *argv[]) {
+srand(time(NULL));
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitWindowSize(640, 480);
+  glutCreateWindow(argv[0]);
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+
+// glutTimerFunc(5000, Z, 0);
+ glutTimerFunc(5000, Z_Kol, 0);
+  glutMainLoop();
+  return 0;
+}
